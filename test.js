@@ -40,3 +40,16 @@ app.get('/', function(req, res){
                         date: new Date()
                 });
 });
+
+
+
+
+
+
+
+PGPASSWORD=${TARGET_PASSWORD} pg_dump -h ${HOST_NAME} \
+            -U ${TARGET_USERNAME} \
+            -d ${APP_DB_NAME} | gpg --batch --yes --passphrase ${CDCARCHIVE_ENCRYPT_S3_KEY} --symmetric gzip(/opt/dumps/${ENV}-${DATABASE_DUMP_SUFFIX}-${NOW_DATE}-dump.sql.gz)
+
+			
+gpg --batch --yes --passphrase ${CDCARCHIVE_ENCRYPT_S3_KEY} --symmetric gzip (/opt/dumps/${ENV}-${DATABASE_DUMP_SUFFIX}-${NOW_DATE}-dump.sql.gz)

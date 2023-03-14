@@ -42,7 +42,15 @@ app.get('/', function(req, res){
 });
 
 
+https://rianbk.com/posts/2022-07-10-quickly-add-realtime-user-monitoring-with-amazon-cloudwatch-rum/
 
+https://blog.simonireilly.com/posts/cloudwatch-rum-end-to-end-monitoring
+
+https://docs.aws.amazon.com/pdfs/AmazonCloudWatch/latest/monitoring/acw-ug.pdf#CloudWatch-RUM-privacy
+
+https://aws.amazon.com/blogs/aws/cloudwatch-rum/
+
+https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-RUM-privacy.html
 
 
 

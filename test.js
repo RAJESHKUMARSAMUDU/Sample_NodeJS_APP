@@ -42,6 +42,11 @@ app.get('/', function(req, res){
 });
 
 
+$(aws rds describe-db-instances \
+                    --db-instance-identifier ${INSTANCE_IDENTIFIER} \
+                    --query 'DBInstances[].{ID:Endpoint.Address}' --output text)
+
+
 https://rianbk.com/posts/2022-07-10-quickly-add-realtime-user-monitoring-with-amazon-cloudwatch-rum/
 
 https://blog.simonireilly.com/posts/cloudwatch-rum-end-to-end-monitoring

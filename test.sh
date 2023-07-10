@@ -92,3 +92,10 @@ done
 
 # Write the JSON array to a file
 echo $JSON_ARRAY > output.json
+
+
+
+    json_object=$(echo "[{'id': '"$PROJECT_ID"', 'name': '"$PROJECT_NAME"', 'string_exists': 'yes'}]" | jq -c .)
+
+    # Append the JSON object to the array
+    JSON_ARRAY=$(echo "$JSON_ARRAY" | jq ". + [$json_object]")

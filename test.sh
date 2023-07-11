@@ -306,3 +306,17 @@ while IFS=, read -r project_id project_name last_activity_at archived; do
 done < "$FILE_NAME"
 
 echo "Project details and search results have been saved to output.csv"
+
+
+while IFS=, read -r id name last_activity archived
+    do
+        # Search for the strings in the .gitlab-ci.yml file
+        content=$(curl --header "PRIVATE-TOKEN: $1" "https://gitlab.com/api/v4/projects/$id/repository/files/%2Egitlab-ci%2Eyml?ref=master" | jq -r '.content' | base64 -d)
+        if echo "$content" | grep -q "$4"; then
+            echo "yes,$id,$name" >> results.csv
+        elif echo "$content" | grep -q "$5"; then
+            echo "automated,$id,$name" >> results.csv
+        else
+            echo "no,$id,$name" >> results.csv
+        fi
+    done <<< "$projects"

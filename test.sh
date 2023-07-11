@@ -376,3 +376,57 @@ done < "$FILE_NAME"
 
 echo "Project details and search results have been saved to output.csv"
 
+
+#!/bin/bash
+
+usage() {
+if [ $# -ne 4 ]
+then
+        echo "ERROR: Incorrect usage "
+        echo "Usage :- $0 gitlab-private-token gitlab-group-id project-id-file-name search-string"
+        exit 1
+fi
+}
+
+usage $*
+
+TOKEN=$1
+GROUP_ID=$2
+FILE_NAME=$3
+SEARCH_STRING=$4
+
+total_pages=$(curl --head -H "PRIVATE-TOKEN:$TOKEN" "https://gitlab.com/api/v4/groups/$GROUP_ID/projects?per_page=100" | grep -i "X-Total-Pages" | sed 's|X-Total-Pages: ||g' | tr -d '\r')
+rm "$FILE_NAME"
+for ((ctr=1; ctr<=$total_pages; ctr++))
+do
+   echo "Retrieving the details for the group - page $ctr"
+   curl -H "PRIVATE-TOKEN:$TOKEN" "https://gitlab.com/api/v4/groups/$GROUP_ID/projects?per_page=100&page=$ctr" | jq '.[] | [.id,.name,.last_activity_at,.archived] | @csv' >> "$FILE_NAME"
+done
+
+# Create a CSV file and add the header
+echo "id,name,last_activity_at,archived,string_exists,another_string_exists" > output.csv
+
+# Read the project IDs, names, last_activity_at, and archived from the CSV file
+while IFS=, read -r project_id project_name last_activity_at archived; do
+  # Get the .gitlab-ci.yml file
+  gitlab_ci=$(curl --header "PRIVATE-TOKEN: $TOKEN" "https://gitlab.com/api/v4/projects/$project_id/repository/files/%2Egitlab-ci%2Eyml?ref=master" | jq -r '.content' | base64 -d)
+
+  # Search for the first string in the .gitlab-ci.yml file
+  if echo "$gitlab_ci" | grep -q "$SEARCH_STRING"; then
+    # Search for the second string in the .gitlab-ci.yml file
+    if echo "$gitlab_ci" | grep -q "another_string"; then
+      # Add the project to the CSV file with "yes" for both strings
+      echo "\"$project_id\",\"$project_name\",\"$last_activity_at\",\"$archived\",\"yes\",\"yes\"" >> output.csv
+    else
+      # Add the project to the CSV file with "yes" for the first string only
+      echo "\"$project_id\",\"$project_name\",\"$last_activity_at\",\"$archived\",\"yes\",\"no\"" >> output.csv
+    fi
+  else
+    # Add the project to the CSV file with "no" for both strings
+    echo "\"$project_id\",\"$project_name\",\"$last_activity_at\",\"$archived\",\"no\",\"no\"" >> output.csv
+  fi
+done < "$FILE_NAME"
+
+curl -s --header "PRIVATE-TOKEN: $TOKEN" "https://gitlab.com/api/v4/projects/$project_id/pipelines?per_page=1" | jq -r '.[0].coverage'
+
+
